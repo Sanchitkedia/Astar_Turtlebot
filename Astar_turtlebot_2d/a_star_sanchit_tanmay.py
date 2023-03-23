@@ -125,8 +125,6 @@ def UserInput(obstacle_map):
         while goal_y < 0 or goal_y > 250:
             print("\nInvalid input. Please enter a value between 0 and 250.")
             goal_y = int(input("Enter the y coordinate of the goal point: "))
-        
-        # goal_theta = int(input("\nEnter Orientation of the robot at the goal point: "))
 
         if obstacle_map.get_at((goal_x,pygame.Surface.get_height(obstacle_map)-1 - goal_y))[0] == 1:
             break
@@ -134,10 +132,9 @@ def UserInput(obstacle_map):
     
     goal.append(goal_x)
     goal.append(goal_y)
-    # goal.append(goal_theta*30)
 
-    rpm1= int(input("\nEnter the first RPM: "))
-    rpm2= int(input("\nEnter the second RPM: "))
+    rpm1= int(input("\nEnter the first RPM [1 -> 10]: "))
+    rpm2= int(input("\nEnter the second RPM [1 -> 10]: "))
     rpm.append(rpm1)
     rpm.append(rpm2)
 
@@ -222,7 +219,6 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
         path.append(current_node)
     path.reverse()
     for i in range(len(path)):
-        # obstacle_map.set_at((int(path[i][0]),int(250 - 1 - path[i][1])),(0,0,255))
         if i == 0:
             pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(250 - 1 - path[i][1])), (int(path[i][0]),int(250 - 1 - path[i][1])), 1)
         else:
@@ -233,7 +229,6 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
   
     pygame.display.update()
     pygame.time.wait(100)
-    # print("\n\033[92m" + "ClosedList Length: " + str(len(ClosedList)) + "\033[0m\n")
     print("\n\033[92m" + "Path Length: " + str(len(path)) + "\033[0m\n")
 
     if args.save_video:
@@ -300,7 +295,6 @@ def main():
     pygame.display.update()
 
     clearance= int(input("\nEnter the clearence for the obstacle: "))
-    # radius= int(input("\nEnter the radius of the robot: "))
     robot_radius = 10.5 #value in cm
     obstacle_map.fill((1,1,1))
 
