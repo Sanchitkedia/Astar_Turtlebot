@@ -92,7 +92,7 @@ def UserInput(obstacle_map):
 
     start = []
     goal = []
-    rpm = []
+    velocity = []
     
     while True:
         start_x = int(input("\nEnter the x coordinate of the start point: "))
@@ -133,14 +133,26 @@ def UserInput(obstacle_map):
     goal.append(goal_x)
     goal.append(goal_y)
 
-    rpm1= int(input("\nEnter the first RPM [1 -> 10]: "))
-    rpm2= int(input("\nEnter the second RPM [1 -> 10]: "))
-    rpm.append(rpm1)
-    rpm.append(rpm2)
+    while True:
+        rpm1= int(input("\nEnter the first RPM: "))
+        if rpm1 >= 0:
+            break
+        print("\nInvalid input. Please enter a value greater than 0.")
 
-    return start, goal, rpm
+    while True:
+        rpm2= int(input("\nEnter the second RPM: "))
+        if rpm2 >= 0:
+            break
+        print("\nInvalid input. Please enter a value greater than 0.")
 
-def nh_constraints(node, rpm, time_move, robot_wheel_radius, robot_wheel_distance, dt,Visited,obstacle_map):
+    velocity1 = rpm1*2*math.pi*3.3/60
+    velocity2 = rpm2*2*math.pi*3.3/60
+    velocity.append(velocity1)
+    velocity.append(velocity2)
+
+    return start, goal, velocity
+
+def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_distance, dt,Visited,obstacle_map):
     D = 0
     t = 0
     x_n = node[0]
@@ -148,17 +160,17 @@ def nh_constraints(node, rpm, time_move, robot_wheel_radius, robot_wheel_distanc
     theta_n = np.deg2rad(node[2] % 360)
     while t<time_move:
         t = t + dt
-        dx = 0.5*robot_wheel_radius * (rpm[0] + rpm[1]) * math.cos(theta_n) * dt
-        dy = 0.5*robot_wheel_radius * (rpm[0] + rpm[1]) * math.sin(theta_n) * dt
+        dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
+        dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         x_n += dx
         y_n += dy
         if (y_n < 0) or (y_n > 250) or (x_n < 0) or (x_n > 600) or (obstacle_map.get_at((int(x_n),pygame.Surface.get_height(obstacle_map)-1 - int(y_n)))[0] != 1):
             return None, None, False
 
-        theta_n  += (robot_wheel_radius / robot_wheel_distance) * (rpm[1] - rpm[0]) * dt
-        dx_t = 0.5*robot_wheel_radius * (rpm[0] + rpm[1]) * math.cos(theta_n) * dt
-        dy_t = 0.5*robot_wheel_radius * (rpm[0] + rpm[1]) * math.sin(theta_n) * dt
-        D = D + math.sqrt(dx_t**2 + dy_t**2)
+        theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * dt
+        dx_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
+        dy_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
+        D += math.sqrt(dx_t**2 + dy_t**2)
 
     theta_n = np.rad2deg(theta_n) % 360
 
@@ -236,13 +248,13 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
         video.export(verbose=True)
         video.compress(target_size=1024, new_file=False)
 
-def AStarPlanner(start, goal, obstacle_map, rpm):
+def AStarPlanner(start, goal, obstacle_map, velocity):
 
     robot_wheel_radius = 3.3 #value in cm
     robot_wheel_distance= 16 #value in cm
     time_move = 1 #Time to move in seconds
     dt = 0.1 #Change in time
-    rpm_arr = [[0,rpm[0]], [rpm[0],0], [rpm[0],rpm[0]], [0,rpm[1]], [rpm[1],0], [rpm[1],rpm[1]], [rpm[0],rpm[1]], [rpm[1],rpm[0]]]
+    velocity_arr = [[0,velocity[0]], [velocity[0],0], [velocity[0],velocity[0]], [0,velocity[1]], [velocity[1],0], [velocity[1],velocity[1]], [velocity[0],velocity[1]], [velocity[1],velocity[0]]]
 
     OpenList = []
     flag = False
@@ -265,9 +277,9 @@ def AStarPlanner(start, goal, obstacle_map, rpm):
             flag = True
             break
 
-        for i in range(len(rpm_arr)):
+        for i in range(len(velocity_arr)):
             new_node = []
-            new_node, D, boolean = nh_constraints(current_node[2], rpm_arr[i], time_move, robot_wheel_radius, robot_wheel_distance, dt,Visited,obstacle_map)
+            new_node, D, boolean = nh_constraints(current_node[2], velocity_arr[i], time_move, robot_wheel_radius, robot_wheel_distance, dt,Visited,obstacle_map)
             if new_node is not None:
                 CheckNode(new_node, ClosedList, OpenList, current_node, goal, boolean, D)
 
@@ -299,8 +311,8 @@ def main():
     obstacle_map.fill((1,1,1))
 
     create_pygame_map(obstacle_map,clearance,robot_radius)
-    start, goal, rpm = UserInput(obstacle_map)
-    AStarPlanner(start, goal, obstacle_map, rpm)
+    start, goal, velocity = UserInput(obstacle_map)
+    AStarPlanner(start, goal, obstacle_map, velocity)
     print("\n\033[1m" + " Press q to exit " + "\033[0m")
 
     while True and args.save_video == False:
