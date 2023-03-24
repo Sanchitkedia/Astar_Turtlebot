@@ -22,63 +22,58 @@ def create_pygame_map(display_surface, clearance, radius):
          # Drawing Scaled Obstacles ie. with clearance
 
             # Equations for rectangle1 using half-plane method
-            if (x >= 100-offset and x <= 150+offset) and (y >= 0-offset and y <= 100+offset):
+            if (x >= 150-offset and x <= 165+offset) and (y >= 0-offset and y <= 125+offset):
                 display_surface.set_at((x,y), YELLOW)
 
             # Equations for rectangle2 using half-plane method
-            if (x >= 100-offset and x <= 150+offset) and (y >= 150-offset and y <= 250+offset):
+            if (x >= 250-offset and x <= 265+offset) and (y >= 75-offset and y <= 200+offset):
                 display_surface.set_at((x,y), YELLOW)
 
             # Equations for hexagon using half-plane method
-            if (y-(0.578*x)-(-offset*(0.578**2 + 1)**0.5 -123.21))>= 0 and (y-(-0.578*x)-(offset*((-0.578)**2 + 1)**0.5 + 373.21))<= 0 and (y-(0.578*x)-(offset*(0.578**2 + 1)**0.5 + 26.79))<= 0 and (y-(-0.578*x)-(-offset*((-0.578)**2 + 1)**0.5 + 223.21))>= 0 and (x-235+offset) >= 0 and (x-365-offset) <= 0:
-                display_surface.set_at((x,y), YELLOW)
-
-            # Equations for triangle using half-plane method
-            if (y-(2*x)-(-offset*(2**2 + 1)**0.5 + (-895)))>= 0 and (y-(-2*x)-(offset*((-2)**2 + 1)**0.5 + (1145)))<= 0 and (x-460+offset) >= 0:
+            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+offset
+            if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+offset :
                 display_surface.set_at((x,y), YELLOW)
 
             # Equations for boundary using half-plane method
-            if(x-offset) <= 0 or (x+offset) >= 600 or (y-offset) <= 0 or (y+offset) >= 250:
+            if(x-offset) <= 0 or (x+offset) >= 600 or (y-offset) <= 0 or (y+offset) >= 200:
                 display_surface.set_at((x,y), YELLOW)
 
          # Drawing Scaled Obstacles ie. with clearance
 
             # Equations for rectangle1 using half-plane method
-            if (x >= 100-clearance and x <= 150+clearance) and (y >= 0-clearance and y <= 100+clearance):
+            if (x >= 150-clearance and x <= 165+clearance) and (y >= 0-clearance and y <= 125+clearance):
                 display_surface.set_at((x,y), RED)
 
             # Equations for rectangle2 using half-plane method
-            if (x >= 100-clearance and x <= 150+clearance) and (y >= 150-clearance and y <= 250+clearance):
+            if (x >= 250-clearance and x <= 265+clearance) and (y >= 75-clearance and y <= 200+clearance):
                 display_surface.set_at((x,y), RED)
 
             # Equations for hexagon using half-plane method
-            if (y-(0.578*x)-(-clearance*(0.578**2 + 1)**0.5 -123.21))>= 0 and (y-(-0.578*x)-(clearance*((-0.578)**2 + 1)**0.5 + 373.21))<= 0 and (y-(0.578*x)-(clearance*(0.578**2 + 1)**0.5 + 26.79))<= 0 and (y-(-0.578*x)-(-clearance*((-0.578)**2 + 1)**0.5 + 223.21))>= 0 and (x-235+clearance) >= 0 and (x-365-clearance) <= 0:
-                display_surface.set_at((x,y), RED)
-
-            # Equations for triangle using half-plane method
-            if (y-(2*x)-(-clearance*(2**2 + 1)**0.5 + (-895)))>= 0 and (y-(-2*x)-(clearance*((-2)**2 + 1)**0.5 + (1145)))<= 0 and (x-460+clearance) >= 0:
+            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+clearance
+            if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+clearance :
                 display_surface.set_at((x,y), RED)
 
             # Equations for boundary using half-plane method
-            if(x-clearance) <= 0 or (x+clearance) >= 600 or (y-clearance) <= 0 or (y+clearance) >= 250:
+            if(x-clearance) <= 0 or (x+clearance) >= 600 or (y-clearance) <= 0 or (y+clearance) >= 200:
                 display_surface.set_at((x,y), RED)
 
          # Drawing Unscaled Obstacles ie. without clearance
 
             # Equations for rectangle1 using half-plane method
-            if (x >= 100 and x <= 150) and (y >= 0 and y <= 100):
+            if (x >= 150 and x <= 165) and (y >= 0 and y <= 125):
                 display_surface.set_at((x,y), WHITE)
-            
+
             # Equations for rectangle2 using half-plane method
-            if (x >= 100 and x <= 150) and (y >= 150 and y <= 250):
+            if (x >= 250 and x <= 265) and (y >= 75 and y <= 200):
                 display_surface.set_at((x,y), WHITE)
 
             # Equations for hexagon using half-plane method
-            if (y-(0.578*x)-(-123.21))>= 0 and (y-(-0.578*x)-(373.21))<= 0 and (y-(0.578*x)-(26.79))<= 0 and (y-(-0.578*x)-(223.21))>= 0 and (x-235) >= 0 and (x-365) <= 0:
+            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50
+            if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50 :
                 display_surface.set_at((x,y), WHITE)
 
-            # Equations for triangle using half-plane method
-            if (y-(2*x)-(-895))>= 0 and (y-(-2*x)-(1145))<= 0 and (x-460) >= 0:
+            # Equations for boundary using half-plane method
+            if(x) <= 0 or (x) >= 600 or (y) <= 0 or (y) >= 200:
                 display_surface.set_at((x,y), WHITE)
 
     pygame.display.update()
@@ -96,8 +91,8 @@ def UserInput(obstacle_map):
             start_x = int(input("Enter the x coordinate of the start point: "))
         
         start_y = int(input("\nEnter the y coordinate of the start point: "))
-        while start_y < 0 or start_y > 250:
-            print("\nInvalid input. Please enter a value between 0 and 250.")
+        while start_y < 0 or start_y > 200:
+            print("\nInvalid input. Please enter a value between 0 and 200.")
             start_y = int(input("Enter the y coordinate of the start point: "))
 
         start_theta = int(input("\nEnter Orientation of the robot at the start point: "))
@@ -117,8 +112,8 @@ def UserInput(obstacle_map):
             goal_x = int(input("Enter the x coordinate of the goal point: "))
         
         goal_y = int(input("\nEnter the y coordinate of the goal point: "))
-        while goal_y < 0 or goal_y > 250:
-            print("\nInvalid input. Please enter a value between 0 and 250.")
+        while goal_y < 0 or goal_y > 200:
+            print("\nInvalid input. Please enter a value between 0 and 200.")
             goal_y = int(input("Enter the y coordinate of the goal point: "))
 
         if obstacle_map.get_at((goal_x,pygame.Surface.get_height(obstacle_map)-1 - goal_y))[0] == 1:
@@ -159,7 +154,7 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
         dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         x_n += dx
         y_n += dy
-        if (y_n < 0) or (y_n > 250) or (x_n < 0) or (x_n > 600) or (obstacle_map.get_at((int(x_n),pygame.Surface.get_height(obstacle_map)-1 - int(y_n)))[0] != 1):
+        if (y_n < 0) or (y_n > 200) or (x_n < 0) or (x_n > 600) or (obstacle_map.get_at((int(x_n),pygame.Surface.get_height(obstacle_map)-1 - int(y_n)))[0] != 1):
             return None, None, False, None
 
         theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * dt
@@ -213,14 +208,14 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
     path = []
     path.append(goal)
     current_node = goal
-    pygame.draw.circle(obstacle_map, (0,0,255), (int(goal[0]),int(250 - 1 - goal[1])), 1.5, 1)
+    pygame.draw.circle(obstacle_map, (0,0,255), (int(goal[0]),int(200 - 1 - goal[1])), 1.5, 1)
     pygame.display.update()
 
     for key in list(ClosedList.keys()):
         if key == (start[0],start[1]):
             continue
         else:
-            obstacle_map.set_at((int(key[0]),int(250 - 1 - key[1])),(255,255,255))
+            obstacle_map.set_at((int(key[0]),int(200 - 1 - key[1])),(255,255,255))
         pygame.display.update()
     while current_node != start:
         current_node = ClosedList[(current_node[0],current_node[1],current_node[2])]
@@ -234,7 +229,7 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
         except rospy.ROSInterruptException:
             pass
         if i != 0:
-            pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(250 - 1 - path[i][1])), (int(path[i-1][0]),int(250 - 1 - path[i-1][1])), 1)
+            pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(200 - 1 - path[i][1])), (int(path[i-1][0]),int(200 - 1 - path[i-1][1])), 1)
         pygame.display.update()
 
     velocity_publisher(0,0,vel_pub,twist,rate)
@@ -267,7 +262,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     while (len(OpenList) > 0):
         current_node = hq.heappop(OpenList)
         ClosedList[(current_node[2][0],current_node[2][1],current_node[2][2])] =  current_node[1]
-        obstacle_map.set_at((int(current_node[2][0]),int(250 - 1 - current_node[2][1])),(255,255,255))
+        obstacle_map.set_at((int(current_node[2][0]),int(200 - 1 - current_node[2][1])),(255,255,255))
         pygame.display.update()
         if CheckGoal(current_node[2], goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action) == True:
             flag = True
@@ -315,7 +310,7 @@ def main():
     pygame.init()
     clock = pygame.time.Clock()
     clock.tick(60)
-    obstacle_map = pygame.display.set_mode((600, 250))
+    obstacle_map = pygame.display.set_mode((600, 200))
     pygame.display.set_caption("A* Planner")
     pygame.display.update()
     obstacle_map.fill((1,1,1))
@@ -323,7 +318,7 @@ def main():
     font = pygame.font.Font('freesansbold.ttf', 32)
     text = font.render('Waiting for User Input in Terminal', True, (255,255,0),(1,1,1))
     textRect = text.get_rect()
-    textRect.center = (600 // 2, 250 // 2)
+    textRect.center = (600 // 2, 200 // 2)
     obstacle_map.blit(text, textRect)
     pygame.display.update()
 
