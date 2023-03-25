@@ -41,20 +41,20 @@ def create_pygame_map(display_surface, clearance, radius):
          # Drawing Scaled Obstacles ie. with clearance
 
             # Equations for rectangle1 using half-plane method
-            if (x >= 150-clearance and x <= 165+clearance) and (y >= 0-clearance and y <= 125+clearance):
+            if (x >= 150-radius and x <= 165+radius) and (y >= 0-radius and y <= 125+radius):
                 display_surface.set_at((x,y), RED)
 
             # Equations for rectangle2 using half-plane method
-            if (x >= 250-clearance and x <= 265+clearance) and (y >= 75-clearance and y <= 200+clearance):
+            if (x >= 250-radius and x <= 265+radius) and (y >= 75-radius and y <= 200+radius):
                 display_surface.set_at((x,y), RED)
 
             # Equations for hexagon using half-plane method
-            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+clearance
-            if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+clearance :
+            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+radius
+            if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+radius :
                 display_surface.set_at((x,y), RED)
 
             # Equations for boundary using half-plane method
-            if(x-clearance) <= 0 or (x+clearance) >= 600 or (y-clearance) <= 0 or (y+clearance) >= 200:
+            if(x-radius) <= 0 or (x+radius) >= 600 or (y-radius) <= 0 or (y+radius) >= 200:
                 display_surface.set_at((x,y), RED)
 
          # Drawing Unscaled Obstacles ie. without clearance
@@ -70,10 +70,6 @@ def create_pygame_map(display_surface, clearance, radius):
             # Equations for hexagon using half-plane method
             math.sqrt((x - 400)**2 + (y - 90)**2) <= 50
             if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50 :
-                display_surface.set_at((x,y), WHITE)
-
-            # Equations for boundary using half-plane method
-            if(x) <= 0 or (x) >= 600 or (y) <= 0 or (y) >= 200:
                 display_surface.set_at((x,y), WHITE)
 
     pygame.display.update()
@@ -176,7 +172,7 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
         return new_node, D, False, velocity
 
 def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
-    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 1.5:
+    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 2:
         print("\n\033[92;5m" + "*****  Goal Reached!  *****" + "\033[0m")
         end_time = time.time()
         time_taken = round(end_time - start_time, 2)
@@ -208,6 +204,7 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
     path = []
     path.append(goal)
     current_node = goal
+    print("\n\033[92m" + "Goal Node is: " + str(goal) + "\033[0m\n")
     pygame.draw.circle(obstacle_map, (0,0,255), (int(goal[0]),int(200 - 1 - goal[1])), 1.5, 1)
     pygame.display.update()
 
@@ -250,7 +247,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     ClosedList = {}
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
-    Visited = np.zeros((1200,500,13))
+    Visited = np.zeros((1200,400,13))
     cost_to_go = math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
@@ -283,7 +280,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
 def robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance, angle):
     velocity_left = velocity[0]
     velocity_right = velocity[1]
-    theta = np.deg2rad(angle)
+    theta = np.deg2rad(angle % 360)
     theta_dot = (velocity_right - velocity_left) * robot_wheel_radius / robot_wheel_distance
     theta += theta_dot
     x_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.cos(theta)
@@ -296,7 +293,7 @@ def velocity_publisher(linear_velocity, angular_velocity,vel_pub,twist,rate):
 
     start_time = rospy.Time.now()
     while rospy.Duration(1) > rospy.Time.now() - start_time:
-        twist.linear.x = linear_velocity
+        twist.linear.x = linear_velocity/100
         twist.angular.z = angular_velocity
         vel_pub.publish(twist)
         rate.sleep() 
@@ -323,7 +320,7 @@ def main():
     pygame.display.update()
 
     clearance= int(input("\nEnter the clearence for the obstacle: "))
-    robot_radius = 10.5 #value in cm
+    robot_radius = 11 #value in cm
     obstacle_map.fill((1,1,1))
 
     create_pygame_map(obstacle_map,clearance,robot_radius)
