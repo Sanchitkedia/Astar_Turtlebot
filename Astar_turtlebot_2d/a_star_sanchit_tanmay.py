@@ -49,23 +49,23 @@ def create_pygame_map(display_surface, clearance, radius):
          # Drawing Scaled Obstacles ie. with clearance
 
             # Equations for rectangle1 using half-plane method
-            if (x >= 100-clearance and x <= 150+clearance) and (y >= 0-clearance and y <= 100+clearance):
+            if (x >= 100-radius and x <= 150+radius) and (y >= 0-radius and y <= 100+radius):
                 display_surface.set_at((x,y), RED)
 
             # Equations for rectangle2 using half-plane method
-            if (x >= 100-clearance and x <= 150+clearance) and (y >= 150-clearance and y <= 250+clearance):
+            if (x >= 100-radius and x <= 150+radius) and (y >= 150-radius and y <= 250+radius):
                 display_surface.set_at((x,y), RED)
 
             # Equations for hexagon using half-plane method
-            if (y-(0.578*x)-(-clearance*(0.578**2 + 1)**0.5 -123.21))>= 0 and (y-(-0.578*x)-(clearance*((-0.578)**2 + 1)**0.5 + 373.21))<= 0 and (y-(0.578*x)-(clearance*(0.578**2 + 1)**0.5 + 26.79))<= 0 and (y-(-0.578*x)-(-clearance*((-0.578)**2 + 1)**0.5 + 223.21))>= 0 and (x-235+clearance) >= 0 and (x-365-clearance) <= 0:
+            if (y-(0.578*x)-(-radius*(0.578**2 + 1)**0.5 -123.21))>= 0 and (y-(-0.578*x)-(radius*((-0.578)**2 + 1)**0.5 + 373.21))<= 0 and (y-(0.578*x)-(radius*(0.578**2 + 1)**0.5 + 26.79))<= 0 and (y-(-0.578*x)-(-radius*((-0.578)**2 + 1)**0.5 + 223.21))>= 0 and (x-235+radius) >= 0 and (x-365-radius) <= 0:
                 display_surface.set_at((x,y), RED)
 
             # Equations for triangle using half-plane method
-            if (y-(2*x)-(-clearance*(2**2 + 1)**0.5 + (-895)))>= 0 and (y-(-2*x)-(clearance*((-2)**2 + 1)**0.5 + (1145)))<= 0 and (x-460+clearance) >= 0:
+            if (y-(2*x)-(-radius*(2**2 + 1)**0.5 + (-895)))>= 0 and (y-(-2*x)-(radius*((-2)**2 + 1)**0.5 + (1145)))<= 0 and (x-460+radius) >= 0:
                 display_surface.set_at((x,y), RED)
 
             # Equations for boundary using half-plane method
-            if(x-clearance) <= 0 or (x+clearance) >= 600 or (y-clearance) <= 0 or (y+clearance) >= 250:
+            if(x-radius) <= 0 or (x+radius) >= 600 or (y-radius) <= 0 or (y+radius) >= 250:
                 display_surface.set_at((x,y), RED)
 
          # Drawing Unscaled Obstacles ie. without clearance
@@ -105,10 +105,7 @@ def UserInput(obstacle_map):
             print("\nInvalid input. Please enter a value between 0 and 250.")
             start_y = int(input("Enter the y coordinate of the start point: "))
 
-        start_theta = int(input("\nEnter Orientation of the robot at the start point: "))
-        while start_theta < 0 or start_theta > 12:
-            print("\nInvalid input. Please enter a value between 0 and 12.")
-            start_theta = int(input("Enter Orientation of the robot at the start point: "))
+        start_theta = int(input("\nEnter Orientation of the robot at the start point (0 -> 360): "))
 
         if obstacle_map.get_at((start_x,pygame.Surface.get_height(obstacle_map)-1 - start_y))[0] == 1:
             break
@@ -116,7 +113,7 @@ def UserInput(obstacle_map):
 
     start.append(start_x)
     start.append(start_y)
-    start.append(start_theta*30)
+    start.append(start_theta)
     
     while True:
         goal_x = int(input("\nEnter the x coordinate of the goal point: "))
