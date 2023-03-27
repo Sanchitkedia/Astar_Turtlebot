@@ -91,7 +91,7 @@ def UserInput(obstacle_map):
             print("\nInvalid input. Please enter a value between 0 and 200.")
             start_y = int(input("Enter the y coordinate of the start point: "))
 
-        start_theta = int(input("\nEnter Orientation of the robot at the start point: "))
+        start_theta = int(input("\nEnter Orientation of the robot at the start point (0 -> 360): "))
 
         if obstacle_map.get_at((start_x,pygame.Surface.get_height(obstacle_map)-1 - start_y))[0] == 1:
             break
@@ -99,7 +99,7 @@ def UserInput(obstacle_map):
 
     start.append(start_x)
     start.append(start_y)
-    start.append(start_theta*30)
+    start.append(start_theta)
     
     while True:
         goal_x = int(input("\nEnter the x coordinate of the goal point: "))
@@ -150,20 +150,19 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
         dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         x_n += dx
         y_n += dy
+        theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * dt
         if (y_n < 0) or (y_n > 200) or (x_n < 0) or (x_n > 600) or (obstacle_map.get_at((int(x_n),pygame.Surface.get_height(obstacle_map)-1 - int(y_n)))[0] != 1):
             return None, None, False, None
 
-        theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * dt
         dx_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
         dy_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         D += math.sqrt(dx_t**2 + dy_t**2)
 
     theta_n = np.rad2deg(theta_n) % 360
-
     new_node = []
     new_node.append(int((x_n)/0.5+0.5)* 0.5)
     new_node.append(int((y_n)/0.5+0.5)* 0.5)
-    new_node.append(theta_n)
+    new_node.append(int(theta_n))
 
     if(Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2]/30)] == 1):
         return new_node, D, True, velocity
@@ -172,7 +171,7 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
         return new_node, D, False, velocity
 
 def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
-    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 2:
+    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 5:
         print("\n\033[92;5m" + "*****  Goal Reached!  *****" + "\033[0m")
         end_time = time.time()
         time_taken = round(end_time - start_time, 2)
@@ -205,7 +204,7 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
     path.append(goal)
     current_node = goal
     print("\n\033[92m" + "Goal Node is: " + str(goal) + "\033[0m\n")
-    pygame.draw.circle(obstacle_map, (0,0,255), (int(goal[0]),int(200 - 1 - goal[1])), 1.5, 1)
+    pygame.draw.circle(obstacle_map, (0,0,255), (int(goal[0]),int(200 - 1 - goal[1])), 2, 1)
     pygame.display.update()
 
     for key in list(ClosedList.keys()):
@@ -221,7 +220,7 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
     for i in range(len(path)):
         try:
             velocity = velocity_action[(path[i][0],path[i][1],path[i][2])]
-            vel_l, vel_a = robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance,path[i][2])
+            vel_l, vel_a = robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance)
             velocity_publisher(vel_l,vel_a,vel_pub,twist,rate)
         except rospy.ROSInterruptException:
             pass
@@ -239,7 +238,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     robot_wheel_radius = 3.3 #value in cm
     robot_wheel_distance= 16 #value in cm
     time_move = 1 #Time to move in seconds
-    dt = 0.1 #Change in time
+    dt = 0.01 #Change in time
     velocity_arr = [[0,velocity[0]], [velocity[0],0], [velocity[0],velocity[0]], [0,velocity[1]], [velocity[1],0], [velocity[1],velocity[1]], [velocity[0],velocity[1]], [velocity[1],velocity[0]]]
 
     OpenList = []
@@ -247,7 +246,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     ClosedList = {}
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
-    Visited = np.zeros((1200,400,13))
+    Visited = np.zeros((1200,400,360))
     cost_to_go = math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
@@ -259,8 +258,8 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     while (len(OpenList) > 0):
         current_node = hq.heappop(OpenList)
         ClosedList[(current_node[2][0],current_node[2][1],current_node[2][2])] =  current_node[1]
-        obstacle_map.set_at((int(current_node[2][0]),int(200 - 1 - current_node[2][1])),(255,255,255))
-        pygame.display.update()
+        # obstacle_map.set_at((int(current_node[2][0]),int(200 - 1 - current_node[2][1])),(255,255,255))
+        # pygame.display.update()
         if CheckGoal(current_node[2], goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action) == True:
             flag = True
             break
@@ -277,22 +276,20 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
         time_taken = round(end_time - start_time, 2)
         print("\033[91m" + "Time taken: " + str(time_taken) + " seconds" + "\033[0m\n")
 
-def robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance, angle):
+def robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance):
     velocity_left = velocity[0]
     velocity_right = velocity[1]
-    theta = np.deg2rad(angle % 360)
     theta_dot = (velocity_right - velocity_left) * robot_wheel_radius / robot_wheel_distance
-    theta += theta_dot
-    x_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.cos(theta)
-    y_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.sin(theta)
+    x_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.cos(theta_dot)
+    y_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.sin(theta_dot)
     linear_velocity = np.sqrt(x_dot**2 + y_dot**2)
     angular_velocity = theta_dot
     return linear_velocity, angular_velocity
     
 def velocity_publisher(linear_velocity, angular_velocity,vel_pub,twist,rate):
 
-    start_time = rospy.Time.now()
-    while rospy.Duration(1) > rospy.Time.now() - start_time:
+    publish_till = rospy.Time.now() + rospy.Duration(1)
+    while rospy.Time.now() <= publish_till:
         twist.linear.x = linear_velocity/100
         twist.angular.z = angular_velocity
         vel_pub.publish(twist)
@@ -320,7 +317,7 @@ def main():
     pygame.display.update()
 
     clearance= int(input("\nEnter the clearence for the obstacle: "))
-    robot_radius = 11 #value in cm
+    robot_radius = 10.5 #value in cm
     obstacle_map.fill((1,1,1))
 
     create_pygame_map(obstacle_map,clearance,robot_radius)
