@@ -131,8 +131,8 @@ def UserInput(obstacle_map):
             break
         print("\nInvalid input. Please enter a value greater than 0.")
 
-    velocity1 = rpm1*2*math.pi*3.3/60
-    velocity2 = rpm2*2*math.pi*3.3/60
+    velocity1 = rpm1*2*math.pi/60
+    velocity2 = rpm2*2*math.pi/60
     velocity.append(velocity1)
     velocity.append(velocity2)
 
@@ -164,10 +164,10 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
     new_node.append(int((y_n)/0.5+0.5)* 0.5)
     new_node.append(int(theta_n))
 
-    if(Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2]/30)] == 1):
+    if(Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2]/10)] == 1):
         return new_node, D, True, velocity
     else:
-        Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2]/30)] = 1
+        Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2]/10)] = 1
         return new_node, D, False, velocity
 
 def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
@@ -238,7 +238,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     robot_wheel_radius = 3.3 #value in cm
     robot_wheel_distance= 16 #value in cm
     time_move = 1 #Time to move in seconds
-    dt = 0.01 #Change in time
+    dt = 0.1 #Change in time
     velocity_arr = [[0,velocity[0]], [velocity[0],0], [velocity[0],velocity[0]], [0,velocity[1]], [velocity[1],0], [velocity[1],velocity[1]], [velocity[0],velocity[1]], [velocity[1],velocity[0]]]
 
     OpenList = []
@@ -246,7 +246,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     ClosedList = {}
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
-    Visited = np.zeros((1200,400,360))
+    Visited = np.zeros((1200,400,36))
     cost_to_go = math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
@@ -280,8 +280,8 @@ def robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance):
     velocity_left = velocity[0]
     velocity_right = velocity[1]
     theta_dot = (velocity_right - velocity_left) * robot_wheel_radius / robot_wheel_distance
-    x_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.cos(theta_dot)
-    y_dot = (velocity_right + velocity_left) * robot_wheel_radius / 2 * np.sin(theta_dot)
+    x_dot = (velocity_right + velocity_left) * robot_wheel_radius * np.cos(theta_dot) / 2 
+    y_dot = (velocity_right + velocity_left) * robot_wheel_radius * np.sin(theta_dot) / 2 
     linear_velocity = np.sqrt(x_dot**2 + y_dot**2)
     angular_velocity = theta_dot
     return linear_velocity, angular_velocity
@@ -298,7 +298,7 @@ def velocity_publisher(linear_velocity, angular_velocity,vel_pub,twist,rate):
 def main():
     vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=100)
     rospy.init_node('turtlebot_publisher', anonymous=True)
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(10)
     twist = Twist()
 
     pygame.init()

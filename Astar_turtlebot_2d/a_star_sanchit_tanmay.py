@@ -145,8 +145,8 @@ def UserInput(obstacle_map):
             break
         print("\nInvalid input. Please enter a value greater than 0.")
     
-    velocity1 = rpm1*2*math.pi*3.3/60
-    velocity2 = rpm2*2*math.pi*3.3/60
+    velocity1 = rpm1*2*math.pi/60
+    velocity2 = rpm2*2*math.pi/60
     velocity.append(velocity1)
     velocity.append(velocity2)
 
