@@ -188,7 +188,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
             for node in OpenList:
                 if node[2] == node_new:
                     idx = OpenList.index(node)
-                    cost = current_node[3]+ D + math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
+                    cost = current_node[3]+ D + 1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
                     if node[0] > cost:
                         OpenList[idx][0] = cost
                         OpenList[idx][3] = current_node[3] + D 
@@ -196,7 +196,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
                         velocity_action[node_new] = vel
                     break
         else:
-            hq.heappush(OpenList, [current_node[3] + D + math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
+            hq.heappush(OpenList, [current_node[3] + D + 1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
             velocity_action[node_new] = vel
 
 def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
@@ -247,7 +247,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
     Visited = np.zeros((1200,400,36))
-    cost_to_go = math.dist([start[0],start[1]],[goal[0],goal[1]])
+    cost_to_go = 1.6 *math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
     node_start = [total_cost, start, start, cost_to_come, cost_to_go]
