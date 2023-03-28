@@ -82,42 +82,42 @@ def UserInput(obstacle_map):
     
     while True:
         start_x = int(input("\nEnter the x coordinate of the start point: "))
-        while start_x < 0 or start_x > 600:
-            print("\nInvalid input. Please enter a value between 0 and 600.")
+        while start_x < -0.5 or start_x > 5.5:
+            print("\nInvalid input. Please enter a value between -0.5 and 5.5.")
             start_x = int(input("Enter the x coordinate of the start point: "))
         
         start_y = int(input("\nEnter the y coordinate of the start point: "))
-        while start_y < 0 or start_y > 200:
-            print("\nInvalid input. Please enter a value between 0 and 200.")
+        while start_y < -1 or start_y > 1:
+            print("\nInvalid input. Please enter a value between -1 and 1.")
             start_y = int(input("Enter the y coordinate of the start point: "))
 
-        start_theta = int(input("\nEnter Orientation of the robot at the start point (0 -> 360): "))
+        start_theta = int(input("\nEnter Orientation of the robot at the start point: "))
 
-        if obstacle_map.get_at((start_x,pygame.Surface.get_height(obstacle_map)-1 - start_y))[0] == 1:
+        if obstacle_map.get_at(((50 + start_x*100),pygame.Surface.get_height(obstacle_map)-1 - (100 + start_y*100)))[0] == 1:
             break
         print("\nThe start point is inside an obstacle. Please enter a valid start point.")
 
-    start.append(start_x)
-    start.append(start_y)
+    start.append(50 + start_x*100)
+    start.append(100 + start_y*100)
     start.append(start_theta)
     
     while True:
         goal_x = int(input("\nEnter the x coordinate of the goal point: "))
-        while (goal_x < 0 or goal_x > 600):
-            print("\nInvalid input. Please enter a value between 0 and 600.")
+        while (goal_x < -0.5 or goal_x > 5.5):
+            print("\nInvalid input. Please enter a value between -0.5 and 5.5.")
             goal_x = int(input("Enter the x coordinate of the goal point: "))
         
         goal_y = int(input("\nEnter the y coordinate of the goal point: "))
-        while goal_y < 0 or goal_y > 200:
-            print("\nInvalid input. Please enter a value between 0 and 200.")
+        while goal_y < -1 or goal_y > 1:
+            print("\nInvalid input. Please enter a value between -1 and 1.")
             goal_y = int(input("Enter the y coordinate of the goal point: "))
 
-        if obstacle_map.get_at((goal_x,pygame.Surface.get_height(obstacle_map)-1 - goal_y))[0] == 1:
+        if obstacle_map.get_at(((50 + goal_x*100),pygame.Surface.get_height(obstacle_map)-1 - (100 + goal_y*100)))[0] == 1:
             break
         print("\nThe goal point is inside an obstacle. Please enter a valid goal point.")
     
-    goal.append(goal_x)
-    goal.append(goal_y)
+    goal.append(50 + goal_x*100)
+    goal.append(100 + goal_y*100)
 
     while True:
         rpm1= int(input("\nEnter the first RPM: "))
@@ -188,7 +188,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
             for node in OpenList:
                 if node[2] == node_new:
                     idx = OpenList.index(node)
-                    cost = current_node[3]+ D + 1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
+                    cost = current_node[3]+ D + 2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
                     if node[0] > cost:
                         OpenList[idx][0] = cost
                         OpenList[idx][3] = current_node[3] + D 
@@ -196,7 +196,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
                         velocity_action[node_new] = vel
                     break
         else:
-            hq.heappush(OpenList, [current_node[3] + D + 1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,1.6  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
+            hq.heappush(OpenList, [current_node[3] + D + 2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
             velocity_action[node_new] = vel
 
 def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
@@ -247,7 +247,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
     Visited = np.zeros((1200,400,36))
-    cost_to_go = 1.6 *math.dist([start[0],start[1]],[goal[0],goal[1]])
+    cost_to_go = 2.5 *math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
     node_start = [total_cost, start, start, cost_to_come, cost_to_go]
