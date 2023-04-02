@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+4
 import pygame
 import time
 import numpy as np
@@ -29,8 +29,8 @@ def create_pygame_map(display_surface, clearance, radius):
             if (x >= 250-offset and x <= 265+offset) and (y >= 75-offset and y <= 200+offset):
                 display_surface.set_at((x,y), YELLOW)
 
-            # Equations for hexagon using half-plane method
-            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+offset
+            # Equations for circleusing half-plane method
+            # math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+offset
             if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+offset :
                 display_surface.set_at((x,y), YELLOW)
 
@@ -48,8 +48,8 @@ def create_pygame_map(display_surface, clearance, radius):
             if (x >= 250-radius and x <= 265+radius) and (y >= 75-radius and y <= 200+radius):
                 display_surface.set_at((x,y), RED)
 
-            # Equations for hexagon using half-plane method
-            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+radius
+            # Equations for circle using half-plane method
+            # math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+radius
             if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50+radius :
                 display_surface.set_at((x,y), RED)
 
@@ -67,8 +67,8 @@ def create_pygame_map(display_surface, clearance, radius):
             if (x >= 250 and x <= 265) and (y >= 75 and y <= 200):
                 display_surface.set_at((x,y), WHITE)
 
-            # Equations for hexagon using half-plane method
-            math.sqrt((x - 400)**2 + (y - 90)**2) <= 50
+            # Equations for circle using half-plane method
+            # math.sqrt((x - 400)**2 + (y - 90)**2) <= 50
             if math.sqrt((x - 400)**2 + (y - 90)**2) <= 50 :
                 display_surface.set_at((x,y), WHITE)
 
@@ -81,19 +81,19 @@ def UserInput(obstacle_map):
     velocity = []
     
     while True:
-        start_x = int(input("\nEnter the x coordinate of the start point: "))
+        start_x = float(input("\nEnter the x coordinate of the start point: "))
         while start_x < -0.5 or start_x > 5.5:
             print("\nInvalid input. Please enter a value between -0.5 and 5.5.")
-            start_x = int(input("Enter the x coordinate of the start point: "))
+            start_x = float(input("Enter the x coordinate of the start point: "))
         
-        start_y = int(input("\nEnter the y coordinate of the start point: "))
+        start_y = float(input("\nEnter the y coordinate of the start point: "))
         while start_y < -1 or start_y > 1:
             print("\nInvalid input. Please enter a value between -1 and 1.")
-            start_y = int(input("Enter the y coordinate of the start point: "))
+            start_y = float(input("Enter the y coordinate of the start point: "))
 
         start_theta = int(input("\nEnter Orientation of the robot at the start point: "))
 
-        if obstacle_map.get_at(((50 + start_x*100),pygame.Surface.get_height(obstacle_map)-1 - (100 + start_y*100)))[0] == 1:
+        if obstacle_map.get_at(((50 + int(start_x*100)),pygame.Surface.get_height(obstacle_map)-1 - (100 + int(start_y*100))))[0] == 1:
             break
         print("\nThe start point is inside an obstacle. Please enter a valid start point.")
 
@@ -102,17 +102,17 @@ def UserInput(obstacle_map):
     start.append(start_theta)
     
     while True:
-        goal_x = int(input("\nEnter the x coordinate of the goal point: "))
+        goal_x = float(input("\nEnter the x coordinate of the goal point: "))
         while (goal_x < -0.5 or goal_x > 5.5):
             print("\nInvalid input. Please enter a value between -0.5 and 5.5.")
-            goal_x = int(input("Enter the x coordinate of the goal point: "))
+            goal_x = float(input("Enter the x coordinate of the goal point: "))
         
-        goal_y = int(input("\nEnter the y coordinate of the goal point: "))
+        goal_y = float(input("\nEnter the y coordinate of the goal point: "))
         while goal_y < -1 or goal_y > 1:
             print("\nInvalid input. Please enter a value between -1 and 1.")
-            goal_y = int(input("Enter the y coordinate of the goal point: "))
+            goal_y = float(input("Enter the y coordinate of the goal point: "))
 
-        if obstacle_map.get_at(((50 + goal_x*100),pygame.Surface.get_height(obstacle_map)-1 - (100 + goal_y*100)))[0] == 1:
+        if obstacle_map.get_at(((50 + int(goal_x*100)),pygame.Surface.get_height(obstacle_map)-1 - (100 + int(goal_y*100))))[0] == 1:
             break
         print("\nThe goal point is inside an obstacle. Please enter a valid goal point.")
     
@@ -171,7 +171,7 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
         return new_node, D, False, velocity
 
 def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
-    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 5:
+    if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 2:
         print("\n\033[92;5m" + "*****  Goal Reached!  *****" + "\033[0m")
         end_time = time.time()
         time_taken = round(end_time - start_time, 2)
@@ -188,7 +188,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
             for node in OpenList:
                 if node[2] == node_new:
                     idx = OpenList.index(node)
-                    cost = current_node[3]+ D + 2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
+                    cost = current_node[3]+ D + 2  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])
                     if node[0] > cost:
                         OpenList[idx][0] = cost
                         OpenList[idx][3] = current_node[3] + D 
@@ -196,7 +196,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D,vel
                         velocity_action[node_new] = vel
                     break
         else:
-            hq.heappush(OpenList, [current_node[3] + D + 2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,2.5  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
+            hq.heappush(OpenList, [current_node[3] + D + 2  * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new,current_node[3] + D,2 * math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
             velocity_action[node_new] = vel
 
 def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action):
@@ -221,12 +221,12 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
         try:
             velocity = velocity_action[(path[i][0],path[i][1],path[i][2])]
             vel_l, vel_a = robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance)
+            if i != 0:
+                pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(200 - 1 - path[i][1])), (int(path[i-1][0]),int(200 - 1 - path[i-1][1])), 1)
+            pygame.display.update()
             velocity_publisher(vel_l,vel_a,vel_pub,twist,rate)
         except rospy.ROSInterruptException:
             pass
-        if i != 0:
-            pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(200 - 1 - path[i][1])), (int(path[i-1][0]),int(200 - 1 - path[i-1][1])), 1)
-        pygame.display.update()
 
     velocity_publisher(0,0,vel_pub,twist,rate)
 
@@ -247,7 +247,7 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     velocity_action = {}
     velocity_action[(start[0],start[1],start[2])] = [0,0]
     Visited = np.zeros((1200,400,36))
-    cost_to_go = 2.5 *math.dist([start[0],start[1]],[goal[0],goal[1]])
+    cost_to_go = 2 *math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
     total_cost = cost_to_go + cost_to_come
     node_start = [total_cost, start, start, cost_to_come, cost_to_go]
@@ -288,17 +288,17 @@ def robot_velocity(velocity,robot_wheel_radius,robot_wheel_distance):
     
 def velocity_publisher(linear_velocity, angular_velocity,vel_pub,twist,rate):
 
-    publish_till = rospy.Time.now() + rospy.Duration(1)
+    publish_till = rospy.Time.now() + rospy.Duration(5)
     while rospy.Time.now() <= publish_till:
-        twist.linear.x = linear_velocity/100
-        twist.angular.z = angular_velocity
+        twist.linear.x = linear_velocity/500
+        twist.angular.z = angular_velocity/5.1
         vel_pub.publish(twist)
         rate.sleep() 
 
 def main():
     vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=100)
     rospy.init_node('turtlebot_publisher', anonymous=True)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(50)
     twist = Twist()
 
     pygame.init()
@@ -317,7 +317,7 @@ def main():
     pygame.display.update()
 
     clearance= int(input("\nEnter the clearence for the obstacle: "))
-    robot_radius = 10.5 #value in cm
+    robot_radius = 11 #value in cm
     obstacle_map.fill((1,1,1))
 
     create_pygame_map(obstacle_map,clearance,robot_radius)
