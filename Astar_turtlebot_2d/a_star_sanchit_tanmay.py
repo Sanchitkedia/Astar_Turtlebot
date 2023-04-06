@@ -24,7 +24,7 @@ def create_pygame_map(display_surface, clearance, radius):
     for x in range(display_surface.get_width()):
         for y in range(display_surface.get_height()):
 
-         # Drawing Scaled Obstacles ie. with clearance
+         # Drawing Scaled Obstacles ie. with offset
 
             # Equations for rectangle1 using half-plane method
             if (x >= 100-offset and x <= 150+offset) and (y >= 0-offset and y <= 100+offset):
@@ -46,7 +46,7 @@ def create_pygame_map(display_surface, clearance, radius):
             if(x-offset) <= 0 or (x+offset) >= 600 or (y-offset) <= 0 or (y+offset) >= 250:
                 display_surface.set_at((x,y), YELLOW)
 
-         # Drawing Scaled Obstacles ie. with clearance
+         # Drawing Scaled Obstacles ie. with radius
 
             # Equations for rectangle1 using half-plane method
             if (x >= 100-radius and x <= 150+radius) and (y >= 0-radius and y <= 100+radius):
@@ -68,7 +68,7 @@ def create_pygame_map(display_surface, clearance, radius):
             if(x-radius) <= 0 or (x+radius) >= 600 or (y-radius) <= 0 or (y+radius) >= 250:
                 display_surface.set_at((x,y), RED)
 
-         # Drawing Unscaled Obstacles ie. without clearance
+         # Drawing Unscaled Obstacles ie. without offset
 
             # Equations for rectangle1 using half-plane method
             if (x >= 100 and x <= 150) and (y >= 0 and y <= 100):
@@ -159,7 +159,7 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
     y_n = node[1]
     theta_n = np.deg2rad(node[2] % 360)
     while t<time_move:
-        t = t + dt
+        t = round((t + dt), 1)
         dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
         dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         x_n += dx
@@ -221,10 +221,12 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
         if key == (start[0],start[1]):
             continue
         else:
-            obstacle_map.set_at((int(key[0]),int(250 - 1 - key[1])),(255,255,255))
+            # obstacle_map.set_at((int(key[0]),int(250 - 1 - key[1])),(255,255,255))
+            pygame.draw.aaline(obstacle_map, (0,255,255), (int(ClosedList[key][0]),int(250 - 1 - ClosedList[key][1])), (int(key[0]),int(250 - 1 - key[1])), 1)
             if args.save_video:
                 video.update(pygame.surfarray.pixels3d(obstacle_map).swapaxes(0, 1), inverted=False)
             pygame.display.update()
+            # pygame.time.wait(10)
     while current_node != start:
         current_node = ClosedList[(current_node[0],current_node[1],current_node[2])]
         path.append(current_node)
