@@ -158,15 +158,15 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
     x_n = node[0]
     y_n = node[1]
     theta_n = np.deg2rad(node[2] % 360)
-    while t<time_move:
-        t = round((t + dt), 1)
+    while round(t,1)<time_move:
+        t = t + dt
         dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
         dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
         x_n += dx
         y_n += dy
         theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * dt
         if (y_n < 0) or (y_n > 250) or (x_n < 0) or (x_n > 600) or (obstacle_map.get_at((int(x_n),pygame.Surface.get_height(obstacle_map)- 1 - int(y_n)))[0] != 1):
-            return None, None, False
+            return None, None, False, None
         
         dx_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * dt
         dy_t = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * dt
@@ -179,23 +179,23 @@ def nh_constraints(node, velocity, time_move, robot_wheel_radius, robot_wheel_di
     new_node.append(int(theta_n)) #Appending integer theta
 
     if(Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2])] == 1):
-        return new_node, D, True
+        return new_node, D, True, velocity
     else:
         Visited[int(new_node[0]*2)][int(new_node[1]*2)][int(new_node[2])] = 1
-        return new_node, D, False
+        return new_node, D, False, velocity
 
-def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time):
+def CheckGoal(node, goal, start, obstacle_map, ClosedList, start_time, robot_wheel_radius,robot_wheel_distance,velocity_action):
     if math.dist([node[0],node[1]],[goal[0],goal[1]]) < 2:
         print("\n\033[92;5m" + "*****  Goal Reached!  *****" + "\033[0m")
         end_time = time.time()
         time_taken = round(end_time - start_time, 2)
         print("\n\033[92m" + "Time taken: " + str(time_taken) + " seconds" + "\033[0m")
-        Backtrack(start, node, ClosedList, obstacle_map)
+        Backtrack(start, node, ClosedList, obstacle_map, robot_wheel_radius,robot_wheel_distance,velocity_action)
         return True
     else:
         return False
 
-def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D):
+def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D, vel, velocity_action):
     node_new = tuple(node_new)
     if node_new not in ClosedList:
         if boolean:
@@ -210,8 +210,9 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D):
                     break
         else:
             hq.heappush(OpenList, [current_node[3] + D + math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new, current_node[3] + D, math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
+            velocity_action[node_new] = vel
 
-def Backtrack(start, goal, ClosedList, obstacle_map):
+def Backtrack(start, goal, ClosedList, obstacle_map, robot_wheel_radius,robot_wheel_distance,velocity_action):
     args = argument_parser()
     video = vidmaker.Video("A*Planner_pygame.mp4", late_export=True)
     path = []
@@ -221,8 +222,22 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
         if key == (start[0],start[1]):
             continue
         else:
-            # obstacle_map.set_at((int(key[0]),int(250 - 1 - key[1])),(255,255,255))
-            pygame.draw.aaline(obstacle_map, (0,255,255), (int(ClosedList[key][0]),int(250 - 1 - ClosedList[key][1])), (int(key[0]),int(250 - 1 - key[1])), 1)
+            x_n = ClosedList[key][0]
+            y_n = ClosedList[key][1]
+            theta_n = np.deg2rad(ClosedList[key][2])
+            velocity = velocity_action[(key[0], key[1], key[2])]    
+            t = 0
+            while round(t, 1) < 1:
+                t = (t + 0.1)
+                dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * 0.1
+                dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * 0.1
+                pygame.draw.aaline(obstacle_map, (128,0,128), (int(x_n),int(250 - 1 - (y_n))), (int(x_n + dx),int(250 - 1 - (y_n+ dy))), 1)
+                x_n += dx
+                y_n += dy
+                theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * 0.1
+
+            pygame.display.update()
+            pygame.time.wait(1)    
             if args.save_video:
                 video.update(pygame.surfarray.pixels3d(obstacle_map).swapaxes(0, 1), inverted=False)
             pygame.display.update()
@@ -232,16 +247,27 @@ def Backtrack(start, goal, ClosedList, obstacle_map):
         path.append(current_node)
     path.reverse()
     for i in range(len(path)):
-        if i == 0:
-            pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(250 - 1 - path[i][1])), (int(path[i][0]),int(250 - 1 - path[i][1])), 1)
-        else:
-            pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(250 - 1 - path[i][1])), (int(path[i-1][0]),int(250 - 1 - path[i-1][1])), 1)
+        if i != 0:
+            x_n = path[i-1][0]
+            y_n = path[i-1][1]
+            theta_n = np.deg2rad(path[i-1][2])
+            velocity = velocity_action[(path[i][0],path[i][1],path[i][2])]    
+            t = 0
+            while round(t, 1) < 1:
+                t = (t + 0.1)
+                dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * 0.1
+                dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * 0.1
+                pygame.draw.aaline(obstacle_map, (0,250,0), (int(x_n),int(250 - 1 - (y_n))), (int(x_n + dx),int(250 - 1 - (y_n+ dy))), 1)
+                x_n += dx
+                y_n += dy
+                theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * 0.1
+            # pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(250 - 1 - path[i][1])), (int(path[i-1][0]),int(250 - 1 - path[i-1][1])), 1)
         if args.save_video:
             video.update(pygame.surfarray.pixels3d(obstacle_map).swapaxes(0, 1), inverted=False)
         pygame.display.update()
   
     pygame.display.update()
-    pygame.time.wait(100)
+    pygame.time.wait(10)
     print("\n\033[92m" + "Path Length: " + str(len(path)) + "\033[0m\n")
 
     if args.save_video:
@@ -260,6 +286,8 @@ def AStarPlanner(start, goal, obstacle_map, velocity):
     OpenList = []
     flag = False
     ClosedList = {}
+    velocity_action = {}
+    velocity_action[(start[0],start[1],start[2])] = [0,0]
     Visited = np.zeros((1200,500,360))
     cost_to_go = math.dist([start[0],start[1]],[goal[0],goal[1]])
     cost_to_come = 0
@@ -272,15 +300,15 @@ def AStarPlanner(start, goal, obstacle_map, velocity):
     while (len(OpenList) > 0):
         current_node = hq.heappop(OpenList)
         ClosedList[(current_node[2][0],current_node[2][1],current_node[2][2])] =  current_node[1]
-        if CheckGoal(current_node[2], goal, start, obstacle_map, ClosedList, start_time) == True:
+        if CheckGoal(current_node[2], goal, start, obstacle_map, ClosedList, start_time, robot_wheel_radius,robot_wheel_distance,velocity_action) == True:
             flag = True
             break
 
         for i in range(len(velocity_arr)):
             new_node = []
-            new_node, D, boolean = nh_constraints(current_node[2], velocity_arr[i], time_move, robot_wheel_radius, robot_wheel_distance, dt, Visited, obstacle_map)
+            new_node, D, boolean, vel = nh_constraints(current_node[2], velocity_arr[i], time_move, robot_wheel_radius, robot_wheel_distance, dt, Visited, obstacle_map)
             if new_node is not None:
-                CheckNode(new_node, ClosedList, OpenList, current_node, goal, boolean, D)
+                CheckNode(new_node, ClosedList, OpenList, current_node, goal, boolean, D, vel, velocity_action)
         
     if flag == False:
         print("\n\033[91m" + "No Valid Path Found!" + "\033[0m\n")
@@ -306,7 +334,7 @@ def main():
     pygame.display.update()
 
     clearance= int(input("\nEnter the clearence for the obstacle: "))
-    robot_radius = 10.5
+    robot_radius = 11
     obstacle_map.fill((1,1,1))
 
     create_pygame_map(obstacle_map,clearance,robot_radius)

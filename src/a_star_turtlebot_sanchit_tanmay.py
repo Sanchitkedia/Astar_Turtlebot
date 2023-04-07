@@ -210,25 +210,20 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
         if key == (start[0],start[1]):
             continue
         else:
-            # print(ClosedList[key])
-            # print(key)
-            # print('\n')
             x_n = ClosedList[key][0]
             y_n = ClosedList[key][1]
             theta_n = np.deg2rad(ClosedList[key][2])
             velocity = velocity_action[(key[0], key[1], key[2])]    
             t = 0
             while round(t, 1) < 1:
-                # t = round((t + 0.1), 1)
                 t = (t + 0.1)
                 dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * 0.1
                 dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * 0.1
-                pygame.draw.aaline(obstacle_map, (0,255,255), (int(x_n),int(200 - 1 - (y_n))), (int(x_n + dx),int(200 - 1 - (y_n+ dy))), 1)
+                pygame.draw.aaline(obstacle_map, (128,0,128), (int(x_n),int(200 - 1 - (y_n))), (int(x_n + dx),int(200 - 1 - (y_n+ dy))), 1)
                 x_n += dx
                 y_n += dy
                 theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * 0.1
 
-            # pygame.draw.aaline(obstacle_map, (0,255,255), (int(ClosedList[key][0]),int(200 - 1 - ClosedList[key][1])), (int(key[0]),int(200 - 1 - key[1])), 1)
         pygame.display.update()
         pygame.time.wait(1)
     while current_node != start:
@@ -244,16 +239,14 @@ def Backtrack(start, goal, ClosedList, obstacle_map,vel_pub,twist,rate,robot_whe
                 y_n = path[i-1][1]
                 theta_n = np.deg2rad(path[i-1][2]) 
                 t = 0
-                while t < 1:
-                    # t = round((t + 0.1), 1)
+                while round(t, 1) < 1:
                     t = (t + 0.1)
                     dx = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.cos(theta_n) * 0.1
                     dy = 0.5*robot_wheel_radius * (velocity[0] + velocity[1]) * math.sin(theta_n) * 0.1
-                    pygame.draw.aaline(obstacle_map, (0,0,255), (int(x_n),int(200 - 1 - (y_n))), (int(x_n + dx),int(200 - 1 - (y_n+ dy))), 1)
+                    pygame.draw.aaline(obstacle_map, (0,250,0), (int(x_n),int(200 - 1 - (y_n))), (int(x_n + dx),int(200 - 1 - (y_n+ dy))), 1)
                     x_n += dx
                     y_n += dy
                     theta_n  += (robot_wheel_radius / robot_wheel_distance) * (velocity[1] - velocity[0]) * 0.1
-                # pygame.draw.aaline(obstacle_map, (0,0,255), (int(path[i][0]),int(200 - 1 - path[i][1])), (int(path[i-1][0]),int(200 - 1 - path[i-1][1])), 1)
             pygame.display.update()
             velocity_publisher(vel_l,vel_a,vel_pub,twist,rate)
         except rospy.ROSInterruptException:
@@ -289,8 +282,6 @@ def AStarPlanner(start, goal, obstacle_map, velocity,vel_pub,twist,rate):
     while (len(OpenList) > 0):
         current_node = hq.heappop(OpenList)
         ClosedList[(current_node[2][0],current_node[2][1],current_node[2][2])] =  current_node[1]
-        # obstacle_map.set_at((int(current_node[2][0]),int(200 - 1 - current_node[2][1])),(255,255,255))
-        # pygame.display.update()
         if CheckGoal(current_node[2], goal, start, obstacle_map, ClosedList, start_time,vel_pub,twist,rate,robot_wheel_radius,robot_wheel_distance,velocity_action) == True:
             flag = True
             break
