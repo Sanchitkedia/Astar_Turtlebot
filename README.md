@@ -93,11 +93,12 @@ roslaunch project_3_phase2_661 astar.launch
 
 ### Video of vizualization of Test Case 1 for 2D implementation in pygame
 
-
+https://user-images.githubusercontent.com/61658557/230699304-535ee729-ebe6-49fc-b144-160dfa0505eb.mp4
 
 ### Video of vizualization of Test Case 1 for gazebo implementation
 
-
+https://user-images.githubusercontent.com/61658557/230699483-482d81ed-a03f-4411-83b1-770206be8b5c.mp4
 
 ### Video of vizualization of Test Case 2 for gazebo implementation
 
+https://user-images.githubusercontent.com/61658557/230699490-4583ff33-a768-45b0-8d17-e617a4774407.mp4
