@@ -207,6 +207,7 @@ def CheckNode(node_new, ClosedList, OpenList, current_node, goal, boolean, D, ve
                         OpenList[idx][0] = cost
                         OpenList[idx][3] = current_node[3] + D
                         OpenList[idx][1] = current_node[2]
+                        velocity_action[node_new] = vel
                     break
         else:
             hq.heappush(OpenList, [current_node[3] + D + math.dist([node_new[0],node_new[1]],[goal[0],goal[1]]), current_node[2], node_new, current_node[3] + D, math.dist([node_new[0],node_new[1]],[goal[0],goal[1]])])
