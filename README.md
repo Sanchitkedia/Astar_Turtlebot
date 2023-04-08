@@ -64,18 +64,40 @@ source devel/setup.bash
 roslaunch project_3_phase2_661 astar.launch
 ```
 
-## Output
+## Input
+
+### The project 2d implementation takes the following command line arguments
 
 - Test case 1
-  - Clearance: 2
-  - START NODE: (19,19,0)
-  - GOAL NODE: (70,200)
-  - RPM1: 5
-  - RPM2: 10
+  - Clearance: 5
+  - START NODE: (50,20,0)
+  - GOAL NODE: (440,20)
+  - RPM1: 100
+  - RPM2: 130
+
+### The project gazebo implementation takes the following command line arguments
+
+- Test case 1
+  - Clearance: 13
+  - START NODE: (0,0,0) # The start node is in gazebo coordinate system
+  - GOAL NODE: (5,0) # The goal node is in gazebo coordinate system
+  - RPM1: 100
+  - RPM2: 130
 
 - Test case 2
-  - Clearance: 2
-  - START NODE: (50,125,0)
-  - GOAL NODE: (440,125)
-  - RPM1: 5
-  - RPM2: 10
+  - Clearance: 14
+  - START NODE: (0,0,0) # The start node is in gazebo coordinate system
+  - GOAL NODE: (5,-0.4) # The goal node is in gazebo coordinate system
+  - RPM1: 100
+  - RPM2: 130
+
+### Video of vizualization of Test Case 1 for 2D implementation in pygame
+
+
+
+### Video of vizualization of Test Case 1 for gazebo implementation
+
+
+
+### Video of vizualization of Test Case 2 for gazebo implementation
+
